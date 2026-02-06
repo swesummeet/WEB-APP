@@ -7,7 +7,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Input: React.FC<InputProps> = ({ label, error, className = '', id, ...props }) => {
   const inputId = id || label.toLowerCase().replace(/\s+/g, '-');
-  
+
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label htmlFor={inputId} className="text-sm font-medium text-[#325D79]">
