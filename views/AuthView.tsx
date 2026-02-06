@@ -14,7 +14,7 @@ interface AuthViewProps {
 export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Login State
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -57,8 +57,8 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     const username = (name + surname).toLowerCase().replace(/\s/g, '');
 
     if (username === ADMIN_CREDENTIALS.username) {
-        setError('Questo nome utente è riservato.');
-        return;
+      setError('Questo nome utente è riservato.');
+      return;
     }
 
     setIsLoading(true);
@@ -77,11 +77,11 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
         onLogin(newUser);
       }
     } catch (err: any) {
-       if (err.message && (err.message.includes('unique') || err.message.includes('taken'))) {
-         setError('Utente già registrato con questo nome e cognome.');
-       } else {
-         setError('Errore durante la registrazione. Verifica Supabase.');
-       }
+      if (err.message && (err.message.includes('unique') || err.message.includes('taken'))) {
+        setError('Utente già registrato con questo nome e cognome.');
+      } else {
+        setError('Errore durante la registrazione. Verifica Supabase.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +116,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10">
         {/* Header Section */}
         <div className="bg-white pt-10 pb-6 text-center border-b border-[#EFEEEE]">
-          <Logo className="scale-75 transform" />
+          <Logo className="scale-75 transform mx-auto block" />
           <p className="text-[#325D79] mt-2 text-sm font-medium tracking-wide">SURVEY PLATFORM</p>
         </div>
 
@@ -221,18 +221,18 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
           {/* Demo Access Buttons */}
           <div className="mt-8 pt-6 border-t border-[#EFEEEE]">
             <div className="grid grid-cols-2 gap-3">
-              <Button 
-                type="button" 
-                variant="secondary" 
+              <Button
+                type="button"
+                variant="secondary"
                 onClick={handleDemoAccess}
                 className="w-full text-xs"
               >
                 <Eye className="w-3 h-3 mr-2" />
                 User Demo
               </Button>
-              <Button 
-                type="button" 
-                variant="secondary" 
+              <Button
+                type="button"
+                variant="secondary"
                 onClick={handleDemoAdmin}
                 className="w-full text-xs"
               >
