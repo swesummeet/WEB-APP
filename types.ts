@@ -3,11 +3,18 @@ export enum UserRole {
   USER = 'USER',
 }
 
+export interface Cascade {
+  id: string;
+  eventId: string;
+  city: string;
+  label: string; // e.g. "Summeet Milano 2024"
+}
+
 export interface EventOption {
   id: string;
   name: string;
   date: string;
-  city: string;
+  cascades: Cascade[];
 }
 
 export interface User {
@@ -16,27 +23,29 @@ export interface User {
   surname: string;
   username: string;
   role: UserRole;
-  eventId?: string; // Admin doesn't need an event
+  cascadeId?: string; // Admin doesn't need one
 }
 
 export interface Question {
   id: string;
   text: string;
-  type: 'text' | 'multiple_choice';
+  type: 'text' | 'multiple_choice' | 'number';
   options?: string[]; // For multiple choice
 }
 
-export interface SurveyResponse {
+export interface Patient {
   id: string;
   userId: string;
-  eventId: string;
-  username: string; // Denormalized for easier export
-  answers: Record<string, string>; // questionId -> answer
+  cascadeId: string;
+  name: string;
+  surname: string;
+  answers: Record<string, string>; // Main survey answers
+  followupAnswers?: Record<string, string> | null; // Follow-up answers (added later)
   timestamp: string;
+  operatorUsername: string; // Who collected the data
 }
 
 export interface DashboardStats {
-  totalResponses: number;
-  responsesByEvent: Record<string, number>;
-  recentResponses: SurveyResponse[];
+  totalPatients: number;
+  patientsByCascade: Record<string, number>;
 }

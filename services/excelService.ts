@@ -1,40 +1,47 @@
 import * as XLSX from 'xlsx';
-import { SurveyResponse, Question, EventOption } from '../types';
-import { MOCK_EVENTS, SURVEY_QUESTIONS } from '../constants';
+import { Patient } from '../types';
+import { SURVEY_QUESTIONS, FOLLOWUP_QUESTIONS, ALL_CASCADES, EVENTS } from '../constants';
 
-export const exportToExcel = (responses: SurveyResponse[]) => {
+export const exportToExcel = (patients: Patient[]) => {
   // 1. Prepare Header Row
-  // ID Risposta, ID Utente, Data Compilazione, Evento, Città, Data Evento, Nome Utente, [Questions...]
-  
+  // ID, Nome Paziente, Cognome Paziente, Evento, Città, Operatore, Data Inserimento, [Main Questions...], [Followup Questions...]
+
   const headers = [
-    'ID Risposta',
-    'ID Utente', // Represents the individual
-    'Data Compilazione',
+    'ID Paziente',
+    'Nome Paziente',
+    'Cognome Paziente',
     'Evento',
     'Città',
-    'Data Evento',
-    'Nome Utente',
-    ...SURVEY_QUESTIONS.map(q => q.text)
+    'Operatore',
+    'Data Inserimento',
+    ...SURVEY_QUESTIONS.map(q => `[Scheda] ${q.text}`),
+    ...FOLLOWUP_QUESTIONS.map(q => `[Followup] ${q.text}`)
   ];
 
   // 2. Map Data Rows
-  const data = responses.map(res => {
-    const event = MOCK_EVENTS.find(e => e.id === res.eventId);
-    
+  const data = patients.map(p => {
+    const cascade = ALL_CASCADES.find(c => c.id === p.cascadeId);
+    const event = EVENTS.find(e => e.id === cascade?.eventId);
+
     // Create base row
     const row: (string | number)[] = [
-      res.id,
-      res.userId,
-      new Date(res.timestamp).toLocaleString(),
-      event?.name || 'Evento Sconosciuto',
-      event?.city || '-',
-      event?.date || '-',
-      res.username
+      p.id,
+      p.name,
+      p.surname,
+      event?.name || 'Sconosciuto',
+      cascade?.city || '-',
+      p.operatorUsername || '-',
+      new Date(p.timestamp).toLocaleString(),
     ];
 
-    // Append answers in order of questions
+    // Append main answers
     SURVEY_QUESTIONS.forEach(q => {
-      row.push(res.answers[q.id] || '');
+      row.push(p.answers[q.id] || '');
+    });
+
+    // Append followup answers
+    FOLLOWUP_QUESTIONS.forEach(q => {
+      row.push(p.followupAnswers ? p.followupAnswers[q.id] || '' : '');
     });
 
     return row;
@@ -46,8 +53,8 @@ export const exportToExcel = (responses: SurveyResponse[]) => {
 
   // 4. Create Workbook
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Risposte");
+  XLSX.utils.book_append_sheet(wb, ws, "Pazienti");
 
   // 5. Download File
-  XLSX.writeFile(wb, `Logica_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `Logica_Report_Pazienti_${new Date().toISOString().slice(0, 10)}.xlsx`);
 };

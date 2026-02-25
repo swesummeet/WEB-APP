@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { username, password, name, surname, role, eventId } = req.body;
+    const { username, password, name, surname, role, cascadeId } = req.body;
 
     if (!username || !password || !name || !surname) {
         return res.status(400).json({ error: 'Campi obbligatori mancanti.' });
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     try {
         const pool = getPool();
 
-        // Verifica se il username è già in uso
+        // Check if username is already taken
         const existing = await pool.query(
             'SELECT id FROM users WHERE username = $1 LIMIT 1',
             [username]
@@ -24,12 +24,12 @@ export default async function handler(req, res) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
-        // Inserisce il nuovo utente
+        // Insert new user
         const result = await pool.query(
-            `INSERT INTO users (username, password, name, surname, role, event_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-            [username, password, name, surname, role || 'USER', eventId || null]
+            `INSERT INTO users (username, password, name, surname, role, cascade_id)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING *`,
+            [username, password, name, surname, role || 'USER', cascadeId || null]
         );
 
         const row = result.rows[0];
@@ -39,13 +39,12 @@ export default async function handler(req, res) {
             surname: row.surname,
             username: row.username,
             role: row.role,
-            eventId: row.event_id,
+            cascadeId: row.cascade_id,
         };
 
         return res.status(201).json(user);
     } catch (err) {
         console.error('Register DB error:', err);
-        // Gestisce violazione del vincolo UNIQUE a livello DB
         if (err.code === '23505') {
             return res.status(409).json({ error: 'Username already taken' });
         }

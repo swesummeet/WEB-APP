@@ -29,7 +29,7 @@ export default async function handler(req, res) {
             surname: row.surname,
             username: row.username,
             role: row.role,
-            eventId: row.event_id,
+            cascadeId: row.cascade_id,
         };
 
         return res.status(200).json(user);

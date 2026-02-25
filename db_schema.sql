@@ -1,7 +1,11 @@
--- COPIA E INCOLLA QUESTO CODICE NELL'SQL EDITOR DI NEON
--- (Neon Console → progetto → SQL Editor)
+-- NUOVO SCHEMA - COPIA E INCOLLA NELL'SQL EDITOR DI NEON
+-- ATTENZIONE: questo schema sostituisce il precedente.
+-- Se hai dati da preservare, esegui prima un backup.
 
--- 1. Tabella USERS (Utenti)
+-- 1. Rimuovi tabelle vecchie (se esistono)
+DROP TABLE IF EXISTS responses CASCADE;
+
+-- 2. Tabella USERS (aggiornata con cascade_id al posto di event_id)
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -9,23 +13,30 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL,
   name TEXT,
   surname TEXT,
-  role TEXT,
-  event_id TEXT
+  role TEXT DEFAULT 'USER',
+  cascade_id TEXT  -- es. 'cas_001_mi' - riferisce alla cascata in constants.ts
 );
 
--- 2. Tabella RESPONSES (Risposte Sondaggi)
-CREATE TABLE IF NOT EXISTS responses (
-  id TEXT PRIMARY KEY,
+-- 3. Tabella PATIENTS (sostituisce 'responses')
+-- Ogni riga è un paziente inserito da un operatore durante lo screening
+CREATE TABLE IF NOT EXISTS patients (
+  id TEXT PRIMARY KEY,                        -- UUID generato dal client
   created_at TIMESTAMPTZ DEFAULT now(),
-  user_id UUID REFERENCES users(id),
-  event_id TEXT,
-  username TEXT,
-  answers JSONB,
-  timestamp TIMESTAMPTZ
+  user_id UUID REFERENCES users(id),          -- operatore che ha inserito
+  cascade_id TEXT NOT NULL,                   -- cascata di appartenenza
+  operator_username TEXT,                     -- username operatore (denormalizzato)
+  name TEXT NOT NULL,                         -- nome paziente
+  surname TEXT NOT NULL,                      -- cognome paziente
+  answers JSONB NOT NULL,                     -- risposte domande principali
+  followup_answers JSONB,                     -- risposte follow-up (nullable, aggiunto dopo)
+  timestamp TIMESTAMPTZ DEFAULT now()
 );
 
--- 3. Creazione Utente Admin di Default
--- Sostituisci 'summeet' e 'maspero05' con le tue credenziali admin se vuoi cambiarle.
+-- 4. Indici per performance
+CREATE INDEX IF NOT EXISTS idx_patients_user_id ON patients(user_id);
+CREATE INDEX IF NOT EXISTS idx_patients_cascade_id ON patients(cascade_id);
+
+-- 5. Utente Admin di Default
 INSERT INTO users (username, password, name, surname, role)
-VALUES ('summeet', 'maspero05', 'Admin', 'User', 'ADMIN')
+VALUES ('summeet', 'maspero05', 'Admin', 'Summeet', 'ADMIN')
 ON CONFLICT (username) DO NOTHING;

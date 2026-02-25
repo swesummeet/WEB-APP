@@ -1,9 +1,5 @@
-import { User, SurveyResponse, UserRole } from '../types';
+import { User, Patient, UserRole } from '../types';
 import { apiFetch } from '../lib/supabaseClient';
-import { ADMIN_CREDENTIALS } from '../constants';
-
-// --- In-Memory Storage for Demo Mode ---
-const DEMO_RESPONSES: SurveyResponse[] = [];
 
 // --- Auth & User Services ---
 
@@ -33,7 +29,7 @@ export const registerUser = async (user: Omit<User, 'id'> & { password: string }
         name: user.name,
         surname: user.surname,
         role: user.role,
-        eventId: user.eventId,
+        cascadeId: user.cascadeId,
       }),
     });
     return newUser as User;
@@ -43,55 +39,61 @@ export const registerUser = async (user: Omit<User, 'id'> & { password: string }
   }
 };
 
-// --- Response Services ---
+// --- Patient Services ---
 
-export const getResponses = async (): Promise<SurveyResponse[]> => {
+export const getMyPatients = async (userId: string): Promise<Patient[]> => {
   try {
-    const dbResponses = await apiFetch('/api/responses');
-    return [...DEMO_RESPONSES, ...(dbResponses as SurveyResponse[])];
+    return await apiFetch(`/api/patients?userId=${encodeURIComponent(userId)}`);
   } catch (err) {
-    console.warn('Errore caricamento risposte:', err);
-    return DEMO_RESPONSES;
+    console.error('Error fetching my patients:', err);
+    return [];
   }
 };
 
-export const getUserResponseCount = async (userId: string): Promise<number> => {
-  if (userId === 'demo_user_preview') {
-    return DEMO_RESPONSES.filter(r => r.userId === userId).length;
-  }
-
+export const getAllPatients = async (cascadeId?: string): Promise<Patient[]> => {
   try {
-    const { count } = await apiFetch(`/api/user-response-count?userId=${encodeURIComponent(userId)}`);
-    return count || 0;
+    const url = cascadeId
+      ? `/api/patients?cascadeId=${encodeURIComponent(cascadeId)}`
+      : '/api/patients';
+    return await apiFetch(url);
   } catch (err) {
-    console.error('Errore conteggio risposte utente:', err);
-    return 0;
+    console.error('Error fetching all patients:', err);
+    return [];
   }
 };
 
-export const saveResponse = async (response: SurveyResponse): Promise<void> => {
-  // Demo Mode
-  if (response.userId === 'demo_user_preview') {
-    console.log('Saving demo response to local memory:', response);
-    DEMO_RESPONSES.push(response);
-    return Promise.resolve();
-  }
+export const savePatient = async (patient: Patient): Promise<void> => {
+  console.log('Attempting to save patient to Neon:', patient);
 
-  console.log('Attempting to save to Neon:', response);
-
-  await apiFetch('/api/save-response', {
+  await apiFetch('/api/save-patient', {
     method: 'POST',
     body: JSON.stringify({
-      id: response.id,
-      userId: response.userId,
-      eventId: response.eventId,
-      username: response.username,
-      answers: response.answers,
-      timestamp: response.timestamp,
+      id: patient.id,
+      userId: patient.userId,
+      cascadeId: patient.cascadeId,
+      operatorUsername: patient.operatorUsername,
+      name: patient.name,
+      surname: patient.surname,
+      answers: patient.answers,
+      timestamp: patient.timestamp,
     }),
   });
 
-  console.log('Neon Save Success');
+  console.log('Patient Save Success');
+};
+
+export const saveFollowup = async (patientId: string, followupAnswers: Record<string, string>): Promise<void> => {
+  console.log('Attempting to save followup for patient:', patientId);
+
+  await apiFetch('/api/save-followup', {
+    method: 'POST',
+    body: JSON.stringify({
+      patientId,
+      followupAnswers,
+    }),
+  });
+
+  console.log('Followup Save Success');
 };
 
 // --- Init ---
