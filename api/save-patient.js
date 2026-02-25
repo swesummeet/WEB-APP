@@ -7,8 +7,8 @@ export default async function handler(req, res) {
 
     const { id, userId, cascadeId, operatorUsername, name, surname, clinicalCode, answers, timestamp } = req.body;
 
-    if (!id || !userId || !cascadeId) {
-        return res.status(400).json({ error: 'Campi obbligatori mancanti (ID, userId o cascadeId).' });
+    if (!id) {
+        return res.status(400).json({ error: 'Errore interno: ID mancante.' });
     }
 
     try {
@@ -18,8 +18,8 @@ export default async function handler(req, res) {
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
             [
                 id,
-                userId,
-                cascadeId,
+                userId || null,
+                cascadeId || null,
                 operatorUsername || null,
                 name || null,
                 surname || null,
