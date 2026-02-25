@@ -1,21 +1,33 @@
 import * as XLSX from 'xlsx';
-import { Patient } from '../types';
+import { Patient, Question } from '../types';
 import { SURVEY_QUESTIONS, FOLLOWUP_QUESTIONS, ALL_CASCADES, EVENTS } from '../constants';
 
-export const exportToExcel = (patients: Patient[]) => {
-  // 1. Prepare Header Row
-  // ID, Nome Paziente, Cognome Paziente, Evento, Città, Operatore, Data Inserimento, [Main Questions...], [Followup Questions...]
+// Helper to flatten questions including subQuestions
+const flattenQuestions = (questions: Question[]): Question[] => {
+  let flat: Question[] = [];
+  questions.forEach(q => {
+    flat.push(q);
+    if (q.subQuestions) {
+      flat = flat.concat(flattenQuestions(q.subQuestions));
+    }
+  });
+  return flat;
+};
 
+export const exportToExcel = (patients: Patient[]) => {
+  const allSurveyQuestions = flattenQuestions(SURVEY_QUESTIONS);
+  const allFollowupQuestions = flattenQuestions(FOLLOWUP_QUESTIONS);
+
+  // 1. Prepare Header Row
   const headers = [
-    'ID Paziente',
-    'Nome Paziente',
-    'Cognome Paziente',
+    'ID Sistema',
+    'Codice Paziente',
     'Evento',
     'Città',
     'Operatore',
     'Data Inserimento',
-    ...SURVEY_QUESTIONS.map(q => `[Scheda] ${q.text}`),
-    ...FOLLOWUP_QUESTIONS.map(q => `[Followup] ${q.text}`)
+    ...allSurveyQuestions.map(q => `[Scheda] ${q.text}`),
+    ...allFollowupQuestions.map(q => `[Followup] ${q.text}`)
   ];
 
   // 2. Map Data Rows
@@ -23,25 +35,29 @@ export const exportToExcel = (patients: Patient[]) => {
     const cascade = ALL_CASCADES.find(c => c.id === p.cascadeId);
     const event = EVENTS.find(e => e.id === cascade?.eventId);
 
-    // Create base row
     const row: (string | number)[] = [
       p.id,
-      p.name,
-      p.surname,
+      p.clinicalCode,
       event?.name || 'Sconosciuto',
       cascade?.city || '-',
       p.operatorUsername || '-',
       new Date(p.timestamp).toLocaleString(),
     ];
 
+    // Helper to format answers (join arrays for multi-select)
+    const formatAnswer = (ans: any) => {
+      if (Array.isArray(ans)) return ans.join(', ');
+      return ans || '';
+    };
+
     // Append main answers
-    SURVEY_QUESTIONS.forEach(q => {
-      row.push(p.answers[q.id] || '');
+    allSurveyQuestions.forEach(q => {
+      row.push(formatAnswer(p.answers[q.id]));
     });
 
     // Append followup answers
-    FOLLOWUP_QUESTIONS.forEach(q => {
-      row.push(p.followupAnswers ? p.followupAnswers[q.id] || '' : '');
+    allFollowupQuestions.forEach(q => {
+      row.push(p.followupAnswers ? formatAnswer(p.followupAnswers[q.id]) : '');
     });
 
     return row;
@@ -53,8 +69,8 @@ export const exportToExcel = (patients: Patient[]) => {
 
   // 4. Create Workbook
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Pazienti");
+  XLSX.utils.book_append_sheet(wb, ws, "Dati Clinici");
 
   // 5. Download File
-  XLSX.writeFile(wb, `Logica_Report_Pazienti_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `Report_Clinico_DMT2_${new Date().toISOString().slice(0, 10)}.xlsx`);
 };

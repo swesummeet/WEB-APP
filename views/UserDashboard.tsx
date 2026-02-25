@@ -8,12 +8,12 @@ import {
   ClipboardList,
   LogOut,
   MapPin,
-  Calendar,
   PlusCircle,
   Search,
   ChevronRight,
   CheckCircle2,
-  Clock
+  Clock,
+  UserCircle
 } from 'lucide-react';
 
 interface UserDashboardProps {
@@ -48,14 +48,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
   }, [user.id]);
 
   const filteredPatients = patients.filter(p =>
-    `${p.name} ${p.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.clinicalCode || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const completedFollowups = patients.filter(p => !!p.followupAnswers).length;
 
   return (
     <div className="min-h-screen bg-[#EFEEEE]">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b border-[#9BD7D1]/30 sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center text-[#325D79]">
           <div className="flex items-center gap-2">
@@ -80,7 +79,6 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* Event Banner */}
         <div className="bg-[#325D79] rounded-3xl p-8 mb-10 text-white relative overflow-hidden shadow-2xl shadow-[#325D79]/20">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -92,7 +90,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
               <h1 className="text-4xl font-black">{cascade?.label}</h1>
               <div className="flex items-center gap-4 mt-4">
                 <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
-                  <span className="block text-[10px] uppercase font-bold text-[#F9A26C]">Totale Pazienti</span>
+                  <span className="block text-[10px] uppercase font-bold text-[#F9A26C]">Schede Inserite</span>
                   <span className="text-2xl font-black">{patients.length}</span>
                 </div>
                 <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
@@ -111,31 +109,29 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
           </div>
         </div>
 
-        {/* Search and Filters */}
         <div className="mb-6 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Cerca paziente per nome o cognome..."
+            placeholder="Cerca per codice paziente (es. MR01)..."
             className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border border-[#9BD7D1]/30 focus:ring-4 focus:ring-[#F9A26C]/20 focus:border-[#F26627] outline-none text-[#325D79] font-medium shadow-sm transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        {/* Patient List */}
         <div className="space-y-4">
-          <h2 className="text-xs font-black text-[#325D79]/50 uppercase tracking-[0.2em] px-2 mb-4">Elenco Pazienti Recenti</h2>
+          <h2 className="text-xs font-black text-[#325D79]/50 uppercase tracking-[0.2em] px-2 mb-4">Pazienti DMT2 Registrati</h2>
 
           {isLoading ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-[#9BD7D1]">
               <div className="animate-spin w-10 h-10 border-4 border-[#F26627] border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-[#325D79] font-bold">Caricamento dati in corso...</p>
+              <p className="text-[#325D79] font-bold">Caricamento dati...</p>
             </div>
           ) : filteredPatients.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-[#9BD7D1]">
               <ClipboardList className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-              <p className="text-slate-400 font-medium">Nessun paziente trovato.</p>
+              <p className="text-slate-400 font-medium font-bold uppercase tracking-widest text-xs">Nessuna scheda trovata</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
@@ -146,12 +142,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#EFEEEE] rounded-xl flex items-center justify-center text-[#325D79] font-black shrink-0">
-                        {patient.name[0]}{patient.surname[0]}
+                      <div className="w-12 h-12 bg-[#325D79]/10 rounded-xl flex items-center justify-center text-[#325D79] font-black shrink-0">
+                        {patient.clinicalCode?.slice(0, 2)}
                       </div>
                       <div>
-                        <h3 className="text-lg font-black text-[#325D79] group-hover:text-[#F26627] transition-colors">
-                          {patient.name} {patient.surname}
+                        <h3 className="text-lg font-black text-[#325D79]">
+                          CODICE: {patient.clinicalCode}
                         </h3>
                         <div className="flex items-center gap-3 text-xs text-slate-400 font-medium mt-1">
                           <span className="flex items-center gap-1">
@@ -159,7 +155,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                             {new Date(patient.timestamp).toLocaleDateString()}
                           </span>
                           <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
-                          <span>ID: {patient.id.slice(-6).toUpperCase()}</span>
+                          <span className="uppercase tracking-tighter">ID: {patient.id.slice(-8)}</span>
                         </div>
                       </div>
                     </div>

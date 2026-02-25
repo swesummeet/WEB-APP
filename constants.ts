@@ -36,128 +36,253 @@ export const EVENTS: EventOption[] = [
   },
 ];
 
-// Flat list of all cascades (for lookups)
 export const ALL_CASCADES = EVENTS.flatMap(ev => ev.cascades);
 
-// --- Main Survey Questions (compiled at time of patient registration) ---
+// --- New Clinical Survey Questions (DMT2) ---
 export const SURVEY_QUESTIONS: Question[] = [
-  // --- DATI GENERALI ---
   {
-    id: 'eta',
-    text: 'Età',
-    type: 'number',
+    id: 'tipologia_paziente',
+    text: 'TIPOLOGIA DI PAZIENTE',
+    type: 'multiple_choice',
+    options: [
+      'Paziente in terapia con Metformina',
+      'Paziente in terapia con SU in monoterapia o in associazione',
+      'Paziente in terapia con DDP4i in monoterapia o in associazione',
+      'Paziente in terapia con GLP1ra in monoterapia o in associazione',
+      'Paziente in terapia con doppio agonista recettoriale GIP/GLP1, in monoterapia o in associazione',
+      'Paziente naive a trattamento per DMT2',
+      'Altro'
+    ],
   },
   {
-    id: 'genere',
-    text: 'Genere',
+    id: 'sesso',
+    text: 'SESSO',
     type: 'multiple_choice',
     options: ['M', 'F'],
   },
-
-  // --- ANAMNESI CLINICA ---
   {
-    id: 'fumo',
-    text: 'Fumo attivo o pregresso',
-    type: 'multiple_choice',
-    options: ['No', 'Attivo', 'Ex fumatore'],
+    id: 'eta',
+    text: 'ETA’ COMPIUTA',
+    type: 'number',
   },
   {
-    id: 'alcol',
-    text: 'Consumo alcol',
-    type: 'multiple_choice',
-    options: ['No', 'Saltuario', 'Frequente'],
+    id: 'peso',
+    text: 'PESO (kg)',
+    type: 'number',
   },
   {
-    id: 'fam_cardio',
-    text: 'Familiarità per Malattie cardiovascolari precoci (età <55 M)',
-    type: 'multiple_choice',
-    options: ['Sì', 'No'],
+    id: 'bmi',
+    text: 'BMI',
+    type: 'number',
   },
   {
-    id: 'fam_diabete',
-    text: 'Familiarità per Diabete tipo 2',
-    type: 'multiple_choice',
-    options: ['Sì', 'No', 'Non so'],
-  },
-
-  // --- STILI DI VITA ---
-  {
-    id: 'dieta',
-    text: 'Segue una dieta bilanciata?',
-    type: 'multiple_choice',
-    options: ['Sì', 'No', 'Non sempre'],
+    id: 'durata_diabete',
+    text: 'DURATA DI DIABETE (anni)',
+    type: 'number',
   },
   {
-    id: 'att_fisica',
-    text: 'Pratica attività fisica regolare (almeno 150 min/settimana)?',
-    type: 'multiple_choice',
-    options: ['Sì', 'No'],
+    id: 'fattori_rischio',
+    text: 'FATTORI DI RISCHIO',
+    type: 'multi_select',
+    options: [
+      'malattia multivasale o stenosi >50%',
+      'eta’>50',
+      'obesita’',
+      'fumo',
+      'dislipidemia',
+      'ipertensione'
+    ],
   },
   {
-    id: 'insonnia',
-    text: 'Soffre di insonnia o disturbi del sonno?',
+    id: 'mcv_diagnosticata',
+    text: 'MCV DIAGNOSTICATA',
     type: 'multiple_choice',
-    options: ['Sì', 'No'],
-  },
-
-  // --- TERAPIE CRONICHE IN CORSO ---
-  {
-    id: 'terapia_ipertensione',
-    text: 'Farmaci antiipertensivi in corso',
-    type: 'multiple_choice',
-    options: ['Sì', 'No'],
-  },
-  {
-    id: 'terapia_statine',
-    text: 'Statine o ipolipemizzanti in corso',
-    type: 'multiple_choice',
-    options: ['Sì', 'No'],
-  },
-  {
-    id: 'terapia_diabete',
-    text: 'Antidiabetici orali / insulina in corso',
-    type: 'multiple_choice',
-    options: ['Sì', 'No'],
+    options: ['SI', 'NO'],
+    subQuestions: [
+      {
+        id: 'mcv_dettaglio',
+        text: 'Selezionare una o più patologie MCV:',
+        type: 'multi_select',
+        options: [
+          'scompenso cardiaco',
+          'fibrillazione atriale',
+          'cardiopatia ischemica',
+          'IMA',
+          'bypass aortocoronarico',
+          'PCA',
+          'coronaropatia',
+          'arteriopatia periferica sintomatica'
+        ]
+      }
+    ]
   },
   {
-    id: 'terapia_anticoagulanti',
-    text: 'Anticoagulanti / antiaggreganti in corso',
+    id: 'danno_organo',
+    text: 'DANNO D’ORGANO',
     type: 'multiple_choice',
-    options: ['Sì', 'No'],
+    options: ['SI', 'NO'],
+    subQuestions: [
+      {
+        id: 'danno_organo_dettaglio',
+        text: 'Selezionare uno o più danni:',
+        type: 'multi_select',
+        options: [
+          'Ipertrofia ventricolare sinistra',
+          'Retinopatia',
+          'Insufficienza renale'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'hba1c',
+    text: 'HBA1C (%)',
+    type: 'number',
+  },
+  {
+    id: 'albuminuria',
+    text: 'ALBUMINURIA',
+    type: 'multiple_choice',
+    options: [
+      'Non misurata',
+      '<30 MG/G',
+      '30-300 mg/g',
+      '>300 mg/g'
+    ],
+  },
+  {
+    id: 'creatinina',
+    text: 'CREATININA (mg/dl)',
+    type: 'number',
+  },
+  {
+    id: 'egfr',
+    text: 'EGFR (mL/min/1.73m2)',
+    type: 'number',
+  },
+  {
+    id: 'ntprobnp',
+    text: 'NTproBNP pg/ml (facoltativo)',
+    type: 'multiple_choice',
+    options: [
+      '< 125',
+      '126 - 300',
+      '301 – 450',
+      '451 – 900',
+      '> 900'
+    ],
+  },
+  {
+    id: 'terapie_non_diabetologiche',
+    text: 'TERAPIE NON DIABETOLOGICHE',
+    type: 'multiple_choice',
+    options: ['SI', 'NO'],
+    subQuestions: [
+      {
+        id: 'terapie_non_diab_dettaglio',
+        text: 'Selezionare una o più terapie:',
+        type: 'multi_select',
+        options: [
+          'Statine/ezetimibe/PCSK9i',
+          'Antipertensivi',
+          'Diuretici',
+          'Antiaggreganti',
+          'Anticoagulanti',
+          'Antiaritmici'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'sospensione_terapia',
+    text: 'SOSPENSIONE TERAPIA IN ATTO',
+    type: 'multiple_choice',
+    options: ['SI', 'NO'],
+  },
+  {
+    id: 'inserimento_terapeutico',
+    text: 'INSERIMENTO TERAPEUTICO',
+    type: 'multi_select', // Can be mono or association
+    options: [
+      'Dapagliflozin',
+      'Empagliflozin',
+      'Canagliflozin',
+      'Ertugliflozin',
+      'Nessuno',
+      'Altro'
+    ],
   },
 ];
 
-// --- Follow-up Questions (compiled after the initial visit) ---
+// --- New Clinical Follow-up Questions ---
 export const FOLLOWUP_QUESTIONS: Question[] = [
-  {
-    id: 'fu_pressione',
-    text: 'Pressione arteriosa sistolica (mmHg)',
-    type: 'number',
-  },
-  {
-    id: 'fu_glicemia',
-    text: 'Glicemia a digiuno (mg/dL)',
-    type: 'number',
-  },
-  {
-    id: 'fu_colesterolo',
-    text: 'Colesterolo totale (mg/dL)',
-    type: 'number',
-  },
   {
     id: 'fu_bmi',
     text: 'BMI',
     type: 'number',
   },
   {
-    id: 'fu_outcome',
-    text: 'Esito screening',
+    id: 'fu_terapie_non_diabetologiche',
+    text: 'TERAPIE NON DIABETOLOGICHE',
     type: 'multiple_choice',
-    options: ['Nella norma', 'Richiede follow-up', 'Inviato a specialista'],
+    options: ['SI', 'NO'],
+    subQuestions: [
+      {
+        id: 'fu_terapie_non_diab_dettaglio',
+        text: 'Selezionare una o più terapie:',
+        type: 'multi_select',
+        options: [
+          'Statine/PCSK9i',
+          'Antipertensivi',
+          'Diuretici',
+          'Antiaggreganti',
+          'Anticoagulanti',
+          'Antiaritmici'
+        ]
+      }
+    ]
   },
   {
-    id: 'fu_note',
-    text: 'Note cliniche',
-    type: 'text',
+    id: 'fu_hba1c',
+    text: 'HBA1C (%)',
+    type: 'number',
+  },
+  {
+    id: 'fu_egfr',
+    text: 'E-GFR (mL/min/1.73m2)',
+    type: 'number',
+  },
+  {
+    id: 'fu_albuminuria',
+    text: 'ALBUMINURIA',
+    type: 'multiple_choice',
+    options: [
+      'Non misurata',
+      '<30 MG/G',
+      '30-300 mg/g',
+      '>300 mg/g'
+    ],
+  },
+  {
+    id: 'fu_proseguimento_terapia',
+    text: 'PROSEGUIMENTO DELLA TERAPIA PER IL DMT2 IMPOSTATA IN PRIMA VISITA',
+    type: 'multiple_choice',
+    options: ['SI', 'NO'],
+    visibilityValue: 'NO',
+    subQuestions: [
+      {
+        id: 'fu_switch_terapia',
+        text: 'Indicare SWITCH (selezionare una o più):',
+        type: 'multi_select',
+        options: [
+          'Dapagliflozin',
+          'Empagliflozin',
+          'Canagliflozin',
+          'Ertugliflozin',
+          'Nessuna (o interruzione terapia con gliflozina)',
+          'Altro'
+        ]
+      }
+    ]
   },
 ];

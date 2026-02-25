@@ -7,7 +7,7 @@ export interface Cascade {
   id: string;
   eventId: string;
   city: string;
-  label: string; // e.g. "Summeet Milano 2024"
+  label: string;
 }
 
 export interface EventOption {
@@ -23,26 +23,29 @@ export interface User {
   surname: string;
   username: string;
   role: UserRole;
-  cascadeId?: string; // Admin doesn't need one
+  cascadeId?: string;
 }
 
 export interface Question {
   id: string;
   text: string;
-  type: 'text' | 'multiple_choice' | 'number';
-  options?: string[]; // For multiple choice
+  type: 'text' | 'multiple_choice' | 'number' | 'multi_select';
+  options?: string[];
+  subQuestions?: Question[]; // Conditional questions
+  visibilityValue?: any;     // Value that triggers subQuestions (default 'SI')
 }
 
 export interface Patient {
   id: string;
   userId: string;
   cascadeId: string;
-  name: string;
-  surname: string;
-  answers: Record<string, string>; // Main survey answers
-  followupAnswers?: Record<string, string> | null; // Follow-up answers (added later)
+  name: string;       // Not used in new clinical logic, but kept for schema compatibility or internal ref
+  surname: string;    // Same as above
+  clinicalCode: string; // The new clinical code (initials + number)
+  answers: Record<string, any>;
+  followupAnswers?: Record<string, any> | null;
   timestamp: string;
-  operatorUsername: string; // Who collected the data
+  operatorUsername: string;
 }
 
 export interface DashboardStats {

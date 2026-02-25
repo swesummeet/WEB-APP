@@ -20,21 +20,23 @@ CREATE TABLE IF NOT EXISTS users (
 -- 3. Tabella PATIENTS (sostituisce 'responses')
 -- Ogni riga è un paziente inserito da un operatore durante lo screening
 CREATE TABLE IF NOT EXISTS patients (
-  id TEXT PRIMARY KEY,                        -- UUID generato dal client
+  id TEXT PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT now(),
-  user_id UUID REFERENCES users(id),          -- operatore che ha inserito
-  cascade_id TEXT NOT NULL,                   -- cascata di appartenenza
-  operator_username TEXT,                     -- username operatore (denormalizzato)
-  name TEXT NOT NULL,                         -- nome paziente
-  surname TEXT NOT NULL,                      -- cognome paziente
-  answers JSONB NOT NULL,                     -- risposte domande principali
-  followup_answers JSONB,                     -- risposte follow-up (nullable, aggiunto dopo)
+  user_id UUID REFERENCES users(id),
+  cascade_id TEXT NOT NULL,
+  operator_username TEXT,
+  name TEXT,                                  -- reso opzionale
+  surname TEXT,                               -- reso opzionale
+  clinical_code TEXT,                         -- Nuovo campo per codice MR01
+  answers JSONB NOT NULL,
+  followup_answers JSONB,
   timestamp TIMESTAMPTZ DEFAULT now()
 );
 
 -- 4. Indici per performance
 CREATE INDEX IF NOT EXISTS idx_patients_user_id ON patients(user_id);
 CREATE INDEX IF NOT EXISTS idx_patients_cascade_id ON patients(cascade_id);
+CREATE INDEX IF NOT EXISTS idx_patients_clinical_code ON patients(clinical_code);
 
 -- 5. Utente Admin di Default
 INSERT INTO users (username, password, name, surname, role)

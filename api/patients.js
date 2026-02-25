@@ -37,6 +37,7 @@ export default async function handler(req, res) {
             operatorUsername: row.operator_username,
             name: row.name,
             surname: row.surname,
+            clinicalCode: row.clinical_code,
             answers: row.answers,
             followupAnswers: row.followup_answers,
             timestamp: row.timestamp,

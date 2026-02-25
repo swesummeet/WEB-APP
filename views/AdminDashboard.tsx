@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllPatients } from '../services/storageService';
 import { exportToExcel } from '../services/excelService';
-import { Patient, User, Cascade } from '../types';
+import { Patient, User } from '../types';
 import { Button } from '../components/Button';
 import { EVENTS, ALL_CASCADES } from '../constants';
 import { Logo } from '../components/Logo';
@@ -12,10 +12,10 @@ import {
   Filter,
   Search,
   ChevronRight,
-  MapPin,
-  Calendar,
   CheckCircle2,
-  FileText
+  FileText,
+  Clock,
+  Activity
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -28,7 +28,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Filter state
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [selectedCascadeId, setSelectedCascadeId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,8 +35,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // For now, we fetch all and filter in frontend for a smoother experience 
-      // with smaller datasets as per current project size.
       const data = await getAllPatients();
       setPatients(data);
     } catch (error) {
@@ -63,20 +60,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
     }
   };
 
-  // Filter Logic
   const filteredPatients = patients.filter(p => {
     const cascade = ALL_CASCADES.find(c => c.id === p.cascadeId);
 
     const matchesEvent = !selectedEventId || cascade?.eventId === selectedEventId;
     const matchesCascade = !selectedCascadeId || p.cascadeId === selectedCascadeId;
     const matchesSearch = !searchTerm ||
-      `${p.name} ${p.surname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.id.toLowerCase().includes(searchTerm.toLowerCase());
+      (p.clinicalCode || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchesEvent && matchesCascade && matchesSearch;
   });
 
-  // Stats
   const totalPatients = filteredPatients.length;
   const followupsDone = filteredPatients.filter(p => !!p.followupAnswers).length;
   const activeEventsCount = new Set(filteredPatients.map(p => {
@@ -88,7 +82,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
 
   return (
     <div className="min-h-screen bg-[#EFEEEE]">
-      {/* Header */}
       <header className="bg-[#325D79] text-white shadow-lg sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -97,7 +90,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             </div>
             <div className="hidden md:block h-8 w-px bg-white/20 mx-2"></div>
             <div className="hidden md:block">
-              <h1 className="text-lg font-black tracking-widest uppercase">Console Admin</h1>
+              <h1 className="text-lg font-black tracking-widest uppercase">Admin Console</h1>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -116,15 +109,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Dynamic Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
           <div>
             <div className="flex items-center gap-2 text-[#325D79]/60 font-black text-xs uppercase tracking-[0.2em] mb-2">
-              <Filter className="w-3 h-3" />
-              Monitoraggio Dati
+              <Activity className="w-3 h-3" />
+              Monitoraggio Ricerca DMT2
             </div>
             <h2 className="text-4xl font-black text-[#325D79]">
-              {currentEvent ? currentEvent.name : "Dashboard Globale"}
+              {currentEvent ? currentEvent.name : "Report Globale Clinico"}
             </h2>
           </div>
 
@@ -134,15 +126,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
             </Button>
             <Button onClick={handleExport} isLoading={isExporting} className="bg-[#F26627] border-none shadow-xl shadow-[#F9A26C]/30 px-8">
               <Download className="w-5 h-5 mr-3" />
-              Scarica Excel
+              Esporta Dati Excel
             </Button>
           </div>
         </div>
 
-        {/* Filters Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#9BD7D1]/30">
-            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Filtra per Evento</label>
+            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Filtra per Progetto</label>
             <select
               className="w-full p-3 bg-[#EFEEEE]/50 rounded-xl outline-none focus:ring-2 focus:ring-[#F9A26C] text-[#325D79] font-bold border-none"
               value={selectedEventId}
@@ -151,13 +142,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
                 setSelectedCascadeId('');
               }}
             >
-              <option value="">Tutti gli Eventi</option>
+              <option value="">Tutti i Progetti</option>
               {EVENTS.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
             </select>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#9BD7D1]/30">
-            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Sede / Cascata</label>
+            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Sede Logistica</label>
             <select
               className="w-full p-3 bg-[#EFEEEE]/50 rounded-xl outline-none focus:ring-2 focus:ring-[#F9A26C] text-[#325D79] font-bold border-none disabled:opacity-50"
               value={selectedCascadeId}
@@ -170,12 +161,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#9BD7D1]/30 relative">
-            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Ricerca Rapida</label>
+            <label className="block text-[10px] font-bold text-[#325D79]/50 uppercase tracking-widest mb-3">Ricerca Codice Paziente</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
               <input
                 type="text"
-                placeholder="Cerca paziente..."
+                placeholder="Es. MR01..."
                 className="w-full pl-10 pr-4 py-3 bg-[#EFEEEE]/50 rounded-xl outline-none focus:ring-2 focus:ring-[#F9A26C] text-[#325D79] font-bold border-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,15 +175,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#9BD7D1]/20">
             <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 text-[#F26627]" />
-              <span className="text-[10px] font-black text-slate-300 uppercase">Pazienti</span>
+              <FileText className="w-8 h-8 text-[#F26627]" />
+              <span className="text-[10px] font-black text-slate-300 uppercase">Schede</span>
             </div>
             <p className="text-4xl font-black text-[#325D79]">{totalPatients}</p>
-            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">Anagrafiche totali</p>
+            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">Inserimenti totali</p>
           </div>
 
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#9BD7D1]/20">
@@ -201,43 +191,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
               <span className="text-[10px] font-black text-slate-300 uppercase">Follow-up</span>
             </div>
             <p className="text-4xl font-black text-[#325D79]">{followupsDone}</p>
-            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">{((followupsDone / (totalPatients || 1)) * 100).toFixed(1)}% completamento</p>
+            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">{((followupsDone / (totalPatients || 1)) * 100).toFixed(1)}% completati</p>
           </div>
 
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#9BD7D1]/20">
             <div className="flex items-center justify-between mb-4">
-              <Calendar className="w-8 h-8 text-[#325D79]/40" />
-              <span className="text-[10px] font-black text-slate-300 uppercase">Eventi</span>
+              <Users className="w-8 h-8 text-[#325D79]/40" />
+              <span className="text-[10px] font-black text-slate-300 uppercase">Progetti</span>
             </div>
             <p className="text-4xl font-black text-[#325D79]">{activeEventsCount}</p>
-            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">Eventi con dati</p>
+            <p className="text-xs font-bold text-slate-400 mt-2 tracking-tight">Progetti con schede</p>
           </div>
 
           <div className="bg-[#325D79] p-8 rounded-3xl shadow-2xl shadow-[#325D79]/20 text-white group cursor-pointer" onClick={handleExport}>
             <div className="flex items-center justify-between mb-4">
-              <FileText className="w-8 h-8 text-[#F9A26C]" />
+              <Download className="w-8 h-8 text-[#F9A26C]" />
               <ChevronRight className="w-5 h-5 text-white/50 group-hover:translate-x-1 transition-transform" />
             </div>
-            <p className="text-lg font-black leading-tight">Esporta Risultati Correnti</p>
-            <p className="text-xs font-bold text-indigo-200 mt-1 opacity-60">Genera report XLSX</p>
+            <p className="text-lg font-black leading-tight">Esporta Report Clinico</p>
+            <p className="text-xs font-bold text-indigo-200 mt-1 opacity-60">Genera file .xlsx</p>
           </div>
         </div>
 
-        {/* Patients Table */}
         <div className="bg-white rounded-3xl shadow-xl shadow-[#325D79]/5 border border-[#9BD7D1]/20 overflow-hidden">
           <div className="px-8 py-6 border-b border-[#EFEEEE] flex justify-between items-center bg-slate-50/50">
-            <h3 className="text-lg font-black text-[#325D79] uppercase tracking-wider">Tabella Anagrafiche</h3>
-            <span className="text-xs font-bold text-slate-400">Mostrando {totalPatients} record</span>
+            <h3 className="text-lg font-black text-[#325D79] uppercase tracking-wider">Registri Clinici</h3>
+            <span className="text-xs font-bold text-slate-400">{totalPatients} record trovati</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-[#EFEEEE]/30 text-[#325D79] font-black uppercase tracking-tighter border-b border-[#9BD7D1]/10">
                 <tr>
-                  <th className="px-8 py-5">Paziente</th>
-                  <th className="px-8 py-5 text-center">Follow-up</th>
-                  <th className="px-8 py-5">Sede / Evento</th>
-                  <th className="px-8 py-5">Operatore</th>
-                  <th className="px-8 py-5">Data</th>
+                  <th className="px-8 py-5">Codice Clinico</th>
+                  <th className="px-8 py-5 text-center">Fase 2</th>
+                  <th className="px-8 py-5">Progetto / Sede</th>
+                  <th className="px-8 py-5">Medico Op.</th>
+                  <th className="px-8 py-5">Data Visita</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EFEEEE]">
@@ -246,53 +235,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
                   const event = EVENTS.find(e => e.id === cascade?.eventId);
                   return (
                     <tr key={p.id} className="hover:bg-[#EFEEEE]/50 transition-colors group">
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-[#325D79]/10 rounded-lg flex items-center justify-center text-[#325D79] font-black text-xs">
-                            {p.name[0]}{p.surname[0]}
-                          </div>
-                          <div>
-                            <p className="font-black text-[#325D79]">{p.name} {p.surname}</p>
-                            <p className="text-[10px] font-mono text-slate-400">{p.id.slice(0, 8)}</p>
-                          </div>
+                      <td className="px-8 py-5 font-black text-[#325D79]">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-[#325D79]/5 py-1 px-2 rounded">{p.clinicalCode}</span>
                         </div>
                       </td>
                       <td className="px-8 py-5 text-center">
                         {p.followupAnswers ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-[#9BD7D1]/20 text-[#325D79] uppercase tracking-tighter">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-[#9BD7D1]/20 text-[#325D79] uppercase tracking-tighter border border-[#9BD7D1]/50">
                             <CheckCircle2 className="w-3 h-3 text-[#F26627]" />
-                            Completato
+                            COMPLETO
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-400 uppercase tracking-tighter">
-                            In attesa
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-300 uppercase tracking-tighter">
+                            PENDENTE
                           </span>
                         )}
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex flex-col">
-                          <span className="font-bold text-[#325D79]">{cascade?.city}</span>
-                          <span className="text-[10px] text-slate-400 font-medium">{event?.name}</span>
+                          <span className="font-bold text-[#325D79]">{event?.name}</span>
+                          <span className="text-[10px] text-slate-400 font-medium">{cascade?.city}</span>
                         </div>
                       </td>
                       <td className="px-8 py-5 font-medium text-slate-500">
-                        @{p.operatorUsername || 'system'}
+                        @{p.operatorUsername}
                       </td>
                       <td className="px-8 py-5 text-slate-400 font-bold">
-                        {new Date(p.timestamp).toLocaleDateString()}
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3 h-3" />
+                          {new Date(p.timestamp).toLocaleDateString()}
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-
-            {!isLoading && filteredPatients.length === 0 && (
-              <div className="py-20 text-center">
-                <Search className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Nessun dato corrispondente ai filtri</p>
-              </div>
-            )}
           </div>
         </div>
       </main>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { User, Patient } from '../types';
+import { User, Patient, Question } from '../types';
 import { FOLLOWUP_QUESTIONS, ALL_CASCADES } from '../constants';
 import { saveFollowup } from '../services/storageService';
 import { Button } from '../components/Button';
-import { ArrowLeft, Activity, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Activity, User as UserIcon, Check } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
 interface FollowupFormProps {
@@ -13,16 +13,25 @@ interface FollowupFormProps {
 }
 
 export const FollowupForm: React.FC<FollowupFormProps> = ({ user, patient, onBack }) => {
-    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [answers, setAnswers] = useState<Record<string, any>>({});
     const [isLoading, setIsLoading] = useState(false);
 
     const cascade = ALL_CASCADES.find(c => c.id === user.cascadeId);
 
-    const handleInputChange = (questionId: string, value: string) => {
+    const handleInputChange = (questionId: string, value: any) => {
         setAnswers(prev => ({
             ...prev,
             [questionId]: value
         }));
+    };
+
+    const handleMultiSelect = (questionId: string, option: string) => {
+        const currentValues = (answers[questionId] as string[]) || [];
+        if (currentValues.includes(option)) {
+            handleInputChange(questionId, currentValues.filter(v => v !== option));
+        } else {
+            handleInputChange(questionId, [...currentValues, option]);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -39,6 +48,80 @@ export const FollowupForm: React.FC<FollowupFormProps> = ({ user, patient, onBac
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const renderQuestion = (q: Question) => {
+        const targetValue = q.visibilityValue || 'SI';
+        const isVisible = q.subQuestions ? answers[q.id] === targetValue : true;
+
+        return (
+            <div key={q.id} className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <label className="block text-xl font-bold text-[#325D79]">
+                    {q.text}
+                </label>
+
+                {q.type === 'number' || q.type === 'text' ? (
+                    <input
+                        type={q.type}
+                        required
+                        className="w-full sm:w-1/2 p-4 border-2 border-[#9BD7D1]/50 rounded-2xl focus:ring-4 focus:ring-[#F26627]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] bg-[#EFEEEE]/30 transition-all"
+                        placeholder={q.type === 'number' ? '0.0' : 'Note...'}
+                        value={answers[q.id] || ''}
+                        onChange={(e) => handleInputChange(q.id, e.target.value)}
+                    />
+                ) : q.type === 'multi_select' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {q.options?.map((option) => {
+                            const selectedArray = (answers[q.id] as string[]) || [];
+                            const isSelected = selectedArray.includes(option);
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => handleMultiSelect(q.id, option)}
+                                    className={`
+                    flex items-center justify-between px-6 py-4 rounded-2xl border-2 text-sm font-black transition-all duration-300
+                    ${isSelected
+                                            ? 'bg-[#F26627] border-[#F26627] text-white shadow-lg'
+                                            : 'bg-white border-[#9BD7D1]/50 text-[#325D79] hover:border-[#F9A26C]'}
+                  `}
+                                >
+                                    <span className="text-left">{option}</span>
+                                    {isSelected && <Check className="w-4 h-4 shrink-0" />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="flex flex-wrap gap-4">
+                        {q.options?.map((option) => {
+                            const isSelected = answers[q.id] === option;
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => handleInputChange(q.id, option)}
+                                    className={`
+                    px-8 py-4 rounded-2xl border-2 text-base font-black transition-all duration-300
+                    ${isSelected
+                                            ? 'bg-[#325D79] border-[#325D79] text-white shadow-xl'
+                                            : 'bg-white border-[#9BD7D1]/50 text-[#325D79] hover:bg-[#EFEEEE] hover:border-[#F9A26C]'}
+                  `}
+                                >
+                                    {option}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {isVisible && q.subQuestions && (
+                    <div className="mt-6 ml-4 pl-6 border-l-4 border-[#F9A26C] space-y-8 py-4 bg-[#EFEEEE]/20 rounded-r-3xl animate-in slide-in-from-left-4 duration-500">
+                        {q.subQuestions.map(subQ => renderQuestion(subQ))}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -66,10 +149,10 @@ export const FollowupForm: React.FC<FollowupFormProps> = ({ user, patient, onBac
                             <div className="inline-block bg-[#325D79] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4">
                                 FASE 2
                             </div>
-                            <h2 className="text-3xl font-black">FOLLOW-UP CLINICO</h2>
+                            <h2 className="text-3xl font-black italic">FOLLOW-UP CLINICO</h2>
                             <div className="mt-4 flex items-center gap-3 bg-white/10 w-fit px-4 py-2 rounded-xl backdrop-blur-md">
                                 <UserIcon className="w-5 h-5 text-white" />
-                                <span className="font-bold text-xl uppercase tracking-tight">{patient.name} {patient.surname}</span>
+                                <span className="font-bold text-xl uppercase tracking-tight">CODICE: {patient.clinicalCode}</span>
                             </div>
                         </div>
                     </div>
@@ -77,59 +160,20 @@ export const FollowupForm: React.FC<FollowupFormProps> = ({ user, patient, onBac
                     <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-12">
 
                         <div className="bg-[#EFEEEE]/50 p-6 rounded-2xl border border-dashed border-[#9BD7D1]/50 mb-8">
-                            <h3 className="text-xs font-black text-[#325D79] uppercase tracking-widest mb-2">Informazioni Logistiche</h3>
-                            <p className="text-sm text-slate-500 font-medium">
+                            <h3 className="text-xs font-black text-[#325D79] uppercase tracking-widest mb-2">Scheda Paziente</h3>
+                            <p className="text-sm text-slate-500 font-medium italic">
                                 Sede: <span className="font-bold text-[#325D79]">{cascade?.label}</span><br />
-                                ID Paziente: <span className="font-mono">{patient.id}</span>
+                                ID Sistema: <span className="font-mono text-[10px]">{patient.id}</span>
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-12">
-                            {FOLLOWUP_QUESTIONS.map((q) => (
-                                <div key={q.id} className="space-y-4">
-                                    <label className="block text-xl font-bold text-[#325D79]">
-                                        {q.text}
-                                    </label>
-
-                                    {q.type === 'number' || q.type === 'text' ? (
-                                        <input
-                                            type={q.type}
-                                            required
-                                            className="w-full sm:w-1/2 p-4 border-2 border-[#9BD7D1]/50 rounded-2xl focus:ring-4 focus:ring-[#F26627]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] bg-[#EFEEEE]/30 transition-all"
-                                            placeholder={q.type === 'number' ? '0.0' : 'Inserisci note...'}
-                                            value={answers[q.id] || ''}
-                                            onChange={(e) => handleInputChange(q.id, e.target.value)}
-                                        />
-                                    ) : (
-                                        <div className="flex flex-wrap gap-4">
-                                            {q.options?.map((option) => {
-                                                const isSelected = answers[q.id] === option;
-                                                return (
-                                                    <button
-                                                        key={option}
-                                                        type="button"
-                                                        onClick={() => handleInputChange(q.id, option)}
-                                                        className={`
-                              px-8 py-4 rounded-2xl border-2 text-base font-black transition-all duration-300
-                              ${isSelected
-                                                                ? 'bg-[#325D79] border-[#325D79] text-white shadow-xl shadow-[#325D79]/30'
-                                                                : 'bg-white border-[#9BD7D1]/50 text-[#325D79] hover:bg-[#EFEEEE] hover:border-[#F9A26C]'}
-                            `}
-                                                    >
-                                                        {option}
-                                                    </button>
-                                                );
-                                            })}
-                                            <input type="text" className="sr-only" required value={answers[q.id] || ''} onChange={() => { }} tabIndex={-1} />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                        <div className="space-y-16">
+                            {FOLLOWUP_QUESTIONS.map(q => renderQuestion(q))}
                         </div>
 
                         <div className="pt-10">
                             <Button type="submit" isLoading={isLoading} className="w-full py-6 text-xl bg-[#F26627] hover:bg-[#d9561b] font-black uppercase tracking-widest shadow-2xl shadow-[#F9A26C]/30 rounded-2xl border-none">
-                                Completa Follow-up
+                                Salva Follow-up
                             </Button>
                         </div>
                     </form>
