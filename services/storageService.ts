@@ -74,6 +74,7 @@ export const savePatient = async (patient: Patient): Promise<void> => {
       operatorUsername: patient.operatorUsername,
       name: patient.name,
       surname: patient.surname,
+      clinicalCode: patient.clinicalCode,
       answers: patient.answers,
       timestamp: patient.timestamp,
     }),
