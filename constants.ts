@@ -5,26 +5,33 @@ export const ADMIN_CREDENTIALS = {
   password: 'maspero05',
 };
 
-// Each event has multiple cascades (cities)
+// Real Events and Cascades
 export const EVENTS: EventOption[] = [
   {
-    id: 'ev_001',
-    name: 'Summeet 2024',
-    date: '2024',
+    id: 'ev_react_now',
+    name: 'RE-ACT NOW',
+    date: '2026',
     cascades: [
-      { id: 'cas_001_mi', eventId: 'ev_001', city: 'Milano', label: 'Summeet 2024 – Milano' },
-      { id: 'cas_001_ro', eventId: 'ev_001', city: 'Roma', label: 'Summeet 2024 – Roma' },
-      { id: 'cas_001_to', eventId: 'ev_001', city: 'Torino', label: 'Summeet 2024 – Torino' },
+      { id: 'cas_react_corbetta', eventId: 'ev_react_now', city: 'Corbetta', label: 'RE-ACT NOW – Corbetta (19/03/26)' },
+      { id: 'cas_react_milano', eventId: 'ev_react_now', city: 'Milano', label: 'RE-ACT NOW – Milano (14/04/26)' },
+      { id: 'cas_react_lomazzo', eventId: 'ev_react_now', city: 'Lomazzo', label: 'RE-ACT NOW – Lomazzo (24/04/26)' },
     ],
   },
   {
-    id: 'ev_002',
-    name: 'Summeet 2025',
-    date: '2025',
+    id: 'ev_act_now_dmt2',
+    name: 'ACT NOW DMT2',
+    date: '2026',
     cascades: [
-      { id: 'cas_002_mi', eventId: 'ev_002', city: 'Milano', label: 'Summeet 2025 – Milano' },
-      { id: 'cas_002_ro', eventId: 'ev_002', city: 'Roma', label: 'Summeet 2025 – Roma' },
-      { id: 'cas_002_to', eventId: 'ev_002', city: 'Torino', label: 'Summeet 2025 – Torino' },
+      { id: 'cas_act_dmt2_gela', eventId: 'ev_act_now_dmt2', city: 'Gela', label: 'ACT NOW DMT2 – Gela (21/03/26)' },
+    ],
+  },
+  {
+    id: 'ev_act_now_3',
+    name: 'ACT NOW 3.0',
+    date: '2026',
+    cascades: [
+      { id: 'cas_act_3_dalmine', eventId: 'ev_act_now_3', city: 'Dalmine', label: 'ACT NOW 3.0 – Dalmine (06/05/26)' },
+      { id: 'cas_act_3_vigevano', eventId: 'ev_act_now_3', city: 'Vigevano (PV)', label: 'ACT NOW 3.0 – Vigevano (PV) (19/05/26)' },
     ],
   },
 ];
