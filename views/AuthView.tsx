@@ -39,7 +39,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
         setError('Credenziali non valide. Riprova.');
       }
     } catch (e) {
-      setError('Errore di connessione. Verifica la configurazione Supabase.');
+      setError('Errore di connessione al database. Riprova più tardi.');
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +80,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
       if (err.message && (err.message.includes('unique') || err.message.includes('taken'))) {
         setError('Utente già registrato con questo nome e cognome.');
       } else {
-        setError('Errore durante la registrazione. Verifica Supabase.');
+        setError('Errore durante la registrazione. Riprova più tardi.');
       }
     } finally {
       setIsLoading(false);
