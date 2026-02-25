@@ -63,7 +63,6 @@ export const FollowupForm: React.FC<FollowupFormProps> = ({ user, patient, onBac
                 {q.type === 'number' || q.type === 'text' ? (
                     <input
                         type={q.type}
-                        required
                         className="w-full sm:w-1/2 p-4 border-2 border-[#9BD7D1]/50 rounded-2xl focus:ring-4 focus:ring-[#F26627]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] bg-[#EFEEEE]/30 transition-all"
                         placeholder={q.type === 'number' ? '0.0' : 'Note...'}
                         value={answers[q.id] || ''}

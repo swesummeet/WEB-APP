@@ -7,8 +7,8 @@ export default async function handler(req, res) {
 
     const { id, userId, cascadeId, operatorUsername, name, surname, clinicalCode, answers, timestamp } = req.body;
 
-    if (!id || !userId || !cascadeId || !answers) {
-        return res.status(400).json({ error: 'Campi obbligatori mancanti.' });
+    if (!id || !userId || !cascadeId) {
+        return res.status(400).json({ error: 'Campi obbligatori mancanti (ID, userId o cascadeId).' });
     }
 
     try {
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
                 name || null,
                 surname || null,
                 clinicalCode || null,
-                JSON.stringify(answers),
+                JSON.stringify(answers || {}),
                 timestamp || new Date().toISOString()
             ]
         );

@@ -7,8 +7,8 @@ export default async function handler(req, res) {
 
     const { patientId, followupAnswers } = req.body;
 
-    if (!patientId || !followupAnswers) {
-        return res.status(400).json({ error: 'patientId e followupAnswers sono obbligatori.' });
+    if (!patientId) {
+        return res.status(400).json({ error: 'patientId è obbligatorio.' });
     }
 
     try {

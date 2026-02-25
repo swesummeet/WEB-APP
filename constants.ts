@@ -162,7 +162,7 @@ export const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: 'ntprobnp',
-    text: 'NTproBNP pg/ml (facoltativo)',
+    text: 'NTproBNP pg/ml',
     type: 'multiple_choice',
     options: [
       '< 125',

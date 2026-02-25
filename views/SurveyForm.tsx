@@ -38,11 +38,7 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!clinicalCode) {
-      alert("Il codice paziente è obbligatorio.");
-      return;
-    }
-
+    // Clinical Code is no longer mandatory per user request
     setIsLoading(true);
 
     // Create a random ID for the patient entry
@@ -85,7 +81,6 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
         {q.type === 'number' || q.type === 'text' ? (
           <input
             type={q.type}
-            required={!q.text.toLowerCase().includes('facoltativo')}
             className="w-full sm:w-1/2 p-4 border-2 border-[#9BD7D1]/50 rounded-2xl focus:ring-4 focus:ring-[#F9A26C]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] bg-[#EFEEEE]/30 transition-all placeholder:text-slate-300"
             placeholder={q.type === 'number' ? '0.0' : 'Scrivi qui...'}
             value={answers[q.id] || ''}
@@ -195,7 +190,6 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
                   placeholder="Iniziali Medico + n. scheda (es. MR01)"
                   value={clinicalCode}
                   onChange={(e) => setClinicalCode(e.target.value.toUpperCase())}
-                  required
                 />
               </div>
               <p className="text-xs text-slate-400 italic">
