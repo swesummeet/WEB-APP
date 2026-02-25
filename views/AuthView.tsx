@@ -5,7 +5,7 @@ import { loginUser, registerUser } from '../services/storageService';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Logo } from '../components/Logo';
-import { Eye, Shield, MapPin, ChevronRight } from 'lucide-react';
+import { Eye, MapPin, ChevronRight } from 'lucide-react';
 
 interface AuthViewProps {
   onLogin: (user: User) => void;
@@ -90,15 +90,6 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     }
   };
 
-  const handleDemoAdmin = () => {
-    onLogin({
-      id: 'demo_admin',
-      name: 'Admin',
-      surname: 'Demo',
-      username: ADMIN_CREDENTIALS.username,
-      role: UserRole.ADMIN,
-    });
-  };
 
   return (
     <div className="min-h-screen bg-[#EFEEEE] flex items-center justify-center p-4">
@@ -202,8 +193,8 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                           type="button"
                           onClick={() => setSelectedCascadeId(cas.id)}
                           className={`flex items-center justify-between p-3 rounded-lg border transition-all ${selectedCascadeId === cas.id
-                              ? 'bg-[#F26627] border-[#F26627] text-white shadow-md'
-                              : 'bg-[#EFEEEE] border-[#9BD7D1]/50 text-[#325D79] hover:border-[#F9A26C]'
+                            ? 'bg-[#F26627] border-[#F26627] text-white shadow-md'
+                            : 'bg-[#EFEEEE] border-[#9BD7D1]/50 text-[#325D79] hover:border-[#F9A26C]'
                             }`}
                         >
                           <div className="flex items-center gap-2">
@@ -236,16 +227,6 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             </form>
           )}
 
-          <div className="mt-8 pt-6 border-t border-[#EFEEEE] flex justify-center">
-            <button
-              type="button"
-              onClick={handleDemoAdmin}
-              className="flex items-center gap-2 text-xs font-bold text-[#325D79]/60 hover:text-[#325D79] transition-colors bg-[#EFEEEE] px-4 py-2 rounded-full"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              ACCESSO AMMINISTRATORE DEMO
-            </button>
-          </div>
         </div>
       </div>
     </div>
