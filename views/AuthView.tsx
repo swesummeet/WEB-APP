@@ -53,7 +53,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     setError('');
 
     if (!selectedCascadeId) {
-      setError('Seleziona la tua città (cascata).');
+      setError('Seleziona la tua città (evento).');
       return;
     }
 
@@ -185,7 +185,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
 
                 {selectedEvent && (
                   <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label className="text-xs font-bold text-[#325D79] uppercase tracking-wider">2. Seleziona Città (Cascata)</label>
+                    <label className="text-xs font-bold text-[#325D79] uppercase tracking-wider">2. Seleziona Città (evento)</label>
                     <div className="grid grid-cols-1 gap-2">
                       {selectedEvent.cascades.map(cas => (
                         <button
