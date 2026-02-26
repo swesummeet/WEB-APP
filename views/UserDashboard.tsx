@@ -64,7 +64,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
           </div>
           <div className="flex items-center gap-6">
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-xs font-bold uppercase tracking-tighter opacity-60">Operatore</span>
+              <span className="text-xs font-bold uppercase tracking-tighter opacity-60">Utente</span>
               <span className="text-sm font-semibold">{user.name} {user.surname}</span>
             </div>
             <button
