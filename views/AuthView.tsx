@@ -223,7 +223,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 <strong className="text-[#325D79]">{(name + surname).toLowerCase().replace(/\s/g, '') || '...'}</strong>
               </div>
 
-              <Button type="submit" isLoading={isLoading} className="w-full py-3">Inizia come Operatore</Button>
+              <Button type="submit" isLoading={isLoading} className="w-full py-3">Registrati</Button>
             </form>
           )}
 
