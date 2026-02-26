@@ -178,7 +178,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                   >
                     <option value="">-- Scegli evento --</option>
                     {EVENTS.map(ev => (
-                      <option key={ev.id} value={ev.id}>{ev.name} ({ev.date})</option>
+                      <option key={ev.id} value={ev.id}>{ev.name}</option>
                     ))}
                   </select>
                 </div>
