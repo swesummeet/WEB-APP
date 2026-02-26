@@ -15,6 +15,7 @@ export const EVENTS: EventOption[] = [
       { id: 'cas_react_corbetta', eventId: 'ev_react_now', city: 'Corbetta', label: 'RE-ACT NOW – Corbetta (19/03/26)' },
       { id: 'cas_react_milano', eventId: 'ev_react_now', city: 'Milano', label: 'RE-ACT NOW – Milano (14/04/26)' },
       { id: 'cas_react_lomazzo', eventId: 'ev_react_now', city: 'Lomazzo', label: 'RE-ACT NOW – Lomazzo (24/04/26)' },
+      { id: 'cas_react_sommal', eventId: 'ev_react_now', city: 'Somma Lombardo', label: 'RE-ACT NOW – Somma Lombardo (21/04/26)' },
     ],
   },
   {
