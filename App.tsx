@@ -5,6 +5,7 @@ import { SurveyForm } from './views/SurveyForm';
 import { FollowupForm } from './views/FollowupForm';
 import { AdminDashboard } from './views/AdminDashboard';
 import { UserDashboard } from './views/UserDashboard';
+import { PatientDetailView } from './views/PatientDetailView';
 import { initStorage } from './services/storageService';
 
 // Initialize storage services
@@ -12,7 +13,7 @@ initStorage();
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [view, setView] = useState<'dashboard' | 'survey' | 'followup'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'survey' | 'followup' | 'detail'>('dashboard');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   // Check for session in local storage on mount (simple persistency)
@@ -45,6 +46,11 @@ function App() {
     setView('followup');
   };
 
+  const viewPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setView('detail');
+  };
+
   // Routing Logic
   if (!user) {
     return <AuthView onLogin={handleLogin} />;
@@ -75,6 +81,21 @@ function App() {
         />
       );
 
+    case 'detail':
+      if (!selectedPatient) {
+        setView('dashboard');
+        return null;
+      }
+      return (
+        <PatientDetailView
+          patient={selectedPatient}
+          onBack={() => {
+            setView('dashboard');
+            setSelectedPatient(null);
+          }}
+        />
+      );
+
     case 'dashboard':
     default:
       return (
@@ -83,6 +104,7 @@ function App() {
           onLogout={handleLogout}
           onStartSurvey={() => setView('survey')}
           onStartFollowup={startFollowup}
+          onViewPatient={viewPatient}
         />
       );
   }

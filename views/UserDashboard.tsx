@@ -13,7 +13,7 @@ import {
   ChevronRight,
   CheckCircle2,
   Clock,
-  UserCircle
+  Eye
 } from 'lucide-react';
 
 interface UserDashboardProps {
@@ -21,9 +21,10 @@ interface UserDashboardProps {
   onLogout: () => void;
   onStartSurvey: () => void;
   onStartFollowup: (patient: Patient) => void;
+  onViewPatient: (patient: Patient) => void;
 }
 
-export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onStartSurvey, onStartFollowup }) => {
+export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onStartSurvey, onStartFollowup, onViewPatient }) => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -160,18 +161,25 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                      <button
+                        onClick={() => onViewPatient(patient)}
+                        className="flex items-center gap-2 bg-[#325D79]/10 hover:bg-[#325D79] text-[#325D79] hover:text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all justify-center"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Visualizza
+                      </button>
                       {patient.followupAnswers ? (
                         <div className="flex items-center gap-2 bg-[#9BD7D1]/20 text-[#325D79] px-4 py-2.5 rounded-xl font-bold text-sm grow md:grow-0 justify-center">
                           <CheckCircle2 className="w-4 h-4 text-[#F26627]" />
-                          Follow-up Completo
+                          Follow-up OK
                         </div>
                       ) : (
                         <button
                           onClick={() => onStartFollowup(patient)}
-                          className="flex items-center gap-2 bg-[#EFEEEE] hover:bg-[#F26627] text-[#325D79] hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all grow md:grow-0 justify-center group/btn"
+                          className="flex items-center gap-2 bg-[#EFEEEE] hover:bg-[#F26627] text-[#325D79] hover:text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all grow md:grow-0 justify-center group/btn"
                         >
-                          Aggiungi Follow-up
+                          Follow-up
                           <ChevronRight className="w-4 h-4 translate-x-0 group-hover/btn:translate-x-1 transition-transform" />
                         </button>
                       )}
