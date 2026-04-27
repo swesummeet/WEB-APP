@@ -33,6 +33,8 @@ export interface Question {
   options?: string[];
   subQuestions?: Question[]; // Conditional questions
   visibilityValue?: any;     // Value that triggers subQuestions (default 'SI')
+  required?: boolean;        // If true, field must be filled before submission
+  computed?: boolean;        // If true, field is auto-calculated and read-only
 }
 
 export interface Patient {

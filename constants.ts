@@ -60,11 +60,13 @@ export const SURVEY_QUESTIONS: Question[] = [
     text: 'SESSO',
     type: 'multiple_choice',
     options: ['M', 'F'],
+    required: true,
   },
   {
     id: 'eta',
     text: 'ETA’ COMPIUTA',
     type: 'number',
+    required: true,
   },
   {
     id: 'peso',
@@ -72,14 +74,21 @@ export const SURVEY_QUESTIONS: Question[] = [
     type: 'number',
   },
   {
+    id: 'altezza',
+    text: 'ALTEZZA (cm)',
+    type: 'number',
+  },
+  {
     id: 'bmi',
     text: 'BMI',
     type: 'number',
+    computed: true,
   },
   {
     id: 'durata_diabete',
     text: 'DURATA DI DIABETE (anni)',
     type: 'number',
+    required: true,
   },
   {
     id: 'fattori_rischio',
@@ -160,6 +169,7 @@ export const SURVEY_QUESTIONS: Question[] = [
     id: 'egfr',
     text: 'EGFR (mL/min/1.73m2)',
     type: 'number',
+    computed: true,
   },
   {
     id: 'ntprobnp',
@@ -218,9 +228,20 @@ export const SURVEY_QUESTIONS: Question[] = [
 // --- New Clinical Follow-up Questions ---
 export const FOLLOWUP_QUESTIONS: Question[] = [
   {
+    id: 'fu_peso',
+    text: 'PESO (kg)',
+    type: 'number',
+  },
+  {
+    id: 'fu_altezza',
+    text: 'ALTEZZA (cm)',
+    type: 'number',
+  },
+  {
     id: 'fu_bmi',
     text: 'BMI',
     type: 'number',
+    computed: true,
   },
   {
     id: 'fu_terapie_non_diabetologiche',
@@ -249,9 +270,15 @@ export const FOLLOWUP_QUESTIONS: Question[] = [
     type: 'number',
   },
   {
+    id: 'fu_creatinina',
+    text: 'CREATININA (mg/dl)',
+    type: 'number',
+  },
+  {
     id: 'fu_egfr',
     text: 'E-GFR (mL/min/1.73m2)',
     type: 'number',
+    computed: true,
   },
   {
     id: 'fu_albuminuria',

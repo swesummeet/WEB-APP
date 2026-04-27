@@ -32,12 +32,16 @@ const AnswerRow: React.FC<{ question: Question; answers: Record<string, any> }> 
   const displayAnswer = formatAnswer(answer);
   const visibilityTrigger = question.visibilityValue ?? 'SI';
   const showSub = question.subQuestions && answer === visibilityTrigger;
+  const altroNote = answers[`${question.id}_altro_note`];
 
   return (
     <div className="border-b border-[#EFEEEE] last:border-0">
       <div className="flex items-start justify-between gap-4 py-3 px-1">
         <span className="text-xs font-bold text-[#325D79]/60 uppercase tracking-wide flex-1">
           {question.text}
+          {question.computed && (
+            <span className="ml-1 text-[10px] text-[#9BD7D1] font-normal">(auto)</span>
+          )}
         </span>
         <span
           className={`text-sm font-semibold text-right max-w-[55%] ${
@@ -47,6 +51,11 @@ const AnswerRow: React.FC<{ question: Question; answers: Record<string, any> }> 
           {displayAnswer}
         </span>
       </div>
+      {altroNote && (
+        <div className="px-1 pb-2">
+          <span className="text-xs italic text-[#F9A26C]">Note "Altro": {altroNote}</span>
+        </div>
+      )}
       {showSub &&
         question.subQuestions!.map((sub) => (
           <div

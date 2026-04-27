@@ -3,7 +3,7 @@ import { User, Patient, Question } from '../types';
 import { SURVEY_QUESTIONS, ALL_CASCADES } from '../constants';
 import { savePatient } from '../services/storageService';
 import { Button } from '../components/Button';
-import { ArrowLeft, ClipboardList, Stethoscope, ChevronDown, Check } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Stethoscope, Check, Calculator } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Input } from '../components/Input';
 
@@ -12,36 +12,116 @@ interface SurveyFormProps {
   onBack: () => void;
 }
 
+// BMI = peso(kg) / (altezza(m))^2
+const calculateBMI = (peso: number, altezza: number): string => {
+  if (peso > 0 && altezza > 0) {
+    const altezzaM = altezza / 100;
+    return (peso / (altezzaM * altezzaM)).toFixed(1);
+  }
+  return '';
+};
+
+// CKD-EPI 2021 (race-free)
+const calculateEGFR = (creatinina: number, eta: number, sesso: string): string => {
+  if (creatinina > 0 && eta > 0 && (sesso === 'M' || sesso === 'F')) {
+    const kappa = sesso === 'F' ? 0.7 : 0.9;
+    const alpha = sesso === 'F' ? -0.241 : -0.302;
+    const femaleFactor = sesso === 'F' ? 1.012 : 1;
+    const scrOverKappa = creatinina / kappa;
+    const egfr = 142
+      * Math.pow(Math.min(scrOverKappa, 1), alpha)
+      * Math.pow(Math.max(scrOverKappa, 1), -1.200)
+      * Math.pow(0.9938, eta)
+      * femaleFactor;
+    return Math.round(egfr).toString();
+  }
+  return '';
+};
+
 export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
   const [clinicalCode, setClinicalCode] = useState('');
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const cascade = ALL_CASCADES.find(c => c.id === user.cascadeId);
 
   const handleInputChange = (questionId: string, value: any) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+    setAnswers(prev => {
+      const updated = { ...prev, [questionId]: value };
+
+      // Auto-calculate BMI when peso or altezza change
+      if (questionId === 'peso' || questionId === 'altezza') {
+        const peso = parseFloat(questionId === 'peso' ? value : prev['peso']);
+        const altezza = parseFloat(questionId === 'altezza' ? value : prev['altezza']);
+        updated['bmi'] = calculateBMI(peso, altezza);
+      }
+
+      // Auto-calculate eGFR when creatinina, eta or sesso change
+      if (questionId === 'creatinina' || questionId === 'eta' || questionId === 'sesso') {
+        const creatinina = parseFloat(questionId === 'creatinina' ? value : prev['creatinina']);
+        const eta = parseFloat(questionId === 'eta' ? value : prev['eta']);
+        const sesso = questionId === 'sesso' ? value : prev['sesso'];
+        updated['egfr'] = calculateEGFR(creatinina, eta, sesso);
+      }
+
+      // Clear "altro" note when a non-Altro single-choice option is selected
+      if (!questionId.endsWith('_altro_note') && typeof value === 'string' && value !== 'Altro') {
+        delete updated[`${questionId}_altro_note`];
+      }
+
+      return updated;
+    });
+
+    // Clear validation error when field is filled
+    if (validationErrors.includes(questionId)) {
+      setValidationErrors(prev => prev.filter(id => id !== questionId));
+    }
   };
 
   const handleMultiSelect = (questionId: string, option: string) => {
     const currentValues = (answers[questionId] as string[]) || [];
+    let newValues: string[];
+
     if (currentValues.includes(option)) {
-      handleInputChange(questionId, currentValues.filter(v => v !== option));
+      newValues = currentValues.filter(v => v !== option);
+      // If "Altro" was deselected, clear the note
+      if (option === 'Altro') {
+        setAnswers(prev => ({
+          ...prev,
+          [questionId]: newValues,
+          [`${questionId}_altro_note`]: undefined,
+        }));
+        return;
+      }
     } else {
-      handleInputChange(questionId, [...currentValues, option]);
+      newValues = [...currentValues, option];
     }
+
+    handleInputChange(questionId, newValues);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clinical Code is no longer mandatory per user request
+    // Validate required fields
+    const requiredQuestions = SURVEY_QUESTIONS.filter(q => q.required);
+    const missing = requiredQuestions.filter(q => {
+      const ans = answers[q.id];
+      if (ans === undefined || ans === null || ans === '') return true;
+      if (Array.isArray(ans) && ans.length === 0) return true;
+      return false;
+    });
+
+    if (missing.length > 0) {
+      setValidationErrors(missing.map(q => q.id));
+      alert(`Compilare i campi obbligatori: ${missing.map(q => q.text).join(', ')}`);
+      return;
+    }
+
+    setValidationErrors([]);
     setIsLoading(true);
 
-    // Create a random ID for the patient entry
     const entryId = 'paz_' + Math.random().toString(36).substring(2, 11);
 
     const patient: Patient = {
@@ -49,7 +129,7 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
       userId: user.id,
       cascadeId: user.cascadeId!,
       operatorUsername: user.username,
-      name: '', // Deprecated in favor of clinicalCode
+      name: '',
       surname: '',
       clinicalCode: clinicalCode,
       answers,
@@ -71,17 +151,44 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
   const renderQuestion = (q: Question) => {
     const targetValue = q.visibilityValue || 'SI';
     const isVisible = q.subQuestions ? answers[q.id] === targetValue : true;
+    const hasError = validationErrors.includes(q.id);
+
+    // Detect if any option is "Altro"
+    const hasAltro = q.options?.some(o => o === 'Altro');
+    const isAltroSelected = hasAltro && (
+      q.type === 'multi_select'
+        ? ((answers[q.id] as string[]) || []).includes('Altro')
+        : answers[q.id] === 'Altro'
+    );
 
     return (
       <div key={q.id} className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
         <label className="block text-xl font-bold text-[#325D79] leading-tight">
           {q.text}
+          {q.required && <span className="text-red-500 ml-1">*</span>}
+          {q.computed && (
+            <span className="inline-flex items-center gap-1 ml-2 text-xs font-bold text-[#9BD7D1] bg-[#9BD7D1]/10 px-2 py-0.5 rounded-full">
+              <Calculator className="w-3 h-3" /> Auto
+            </span>
+          )}
         </label>
+
+        {hasError && (
+          <p className="text-red-500 text-xs font-bold animate-in fade-in duration-300">
+            ⚠ Campo obbligatorio
+          </p>
+        )}
 
         {q.type === 'number' || q.type === 'text' ? (
           <input
             type={q.type}
-            className="w-full sm:w-1/2 p-4 border-2 border-[#9BD7D1]/50 rounded-2xl focus:ring-4 focus:ring-[#F9A26C]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] bg-[#EFEEEE]/30 transition-all placeholder:text-slate-300"
+            className={`w-full sm:w-1/2 p-4 border-2 rounded-2xl focus:ring-4 focus:ring-[#F9A26C]/20 focus:border-[#F26627] outline-none font-bold text-2xl text-[#325D79] transition-all placeholder:text-slate-300 ${
+              q.computed
+                ? 'bg-[#9BD7D1]/10 border-[#9BD7D1]/40'
+                : hasError
+                  ? 'bg-red-50 border-red-300'
+                  : 'bg-[#EFEEEE]/30 border-[#9BD7D1]/50'
+            }`}
             placeholder={q.type === 'number' ? '0.0' : 'Scrivi qui...'}
             value={answers[q.id] || ''}
             onChange={(e) => handleInputChange(q.id, e.target.value)}
@@ -110,7 +217,7 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
             })}
           </div>
         ) : (
-          <div className="flex flex-wrap gap-4">
+          <div className={`flex flex-wrap gap-4 ${hasError ? 'ring-2 ring-red-300 rounded-2xl p-2 bg-red-50/50' : ''}`}>
             {q.options?.map((option) => {
               const isSelected = answers[q.id] === option;
               return (
@@ -129,6 +236,20 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {/* "Altro" note field */}
+        {isAltroSelected && (
+          <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+            <label className="block text-sm font-bold text-[#F9A26C] mb-1">Specificare &quot;Altro&quot;:</label>
+            <textarea
+              className="w-full p-4 border-2 border-[#F9A26C]/50 rounded-2xl focus:ring-4 focus:ring-[#F9A26C]/20 focus:border-[#F26627] outline-none text-sm text-[#325D79] bg-[#EFEEEE]/30 transition-all resize-none"
+              placeholder="Inserire note..."
+              rows={3}
+              value={answers[`${q.id}_altro_note`] || ''}
+              onChange={(e) => handleInputChange(`${q.id}_altro_note`, e.target.value)}
+            />
           </div>
         )}
 
@@ -203,6 +324,8 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
                 <Stethoscope className="w-6 h-6 text-[#325D79]" />
                 <h3 className="text-lg font-black text-[#325D79] uppercase tracking-wider">Parametri Clinici</h3>
               </div>
+
+              <p className="text-xs text-slate-400 italic">I campi contrassegnati con <span className="text-red-500 font-bold">*</span> sono obbligatori.</p>
 
               <div className="space-y-16">
                 {SURVEY_QUESTIONS.map(q => renderQuestion(q))}
