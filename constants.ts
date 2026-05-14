@@ -35,6 +35,14 @@ export const EVENTS: EventOption[] = [
       { id: 'cas_act_3_vigevano', eventId: 'ev_act_now_3', city: 'Vigevano (PV)', label: 'ACT NOW 3.0 – Vigevano (PV) (19/05/26)' },
     ],
   },
+  {
+    id: 'ev_act_now',
+    name: 'ACT NOW',
+    date: '2026',
+    cascades: [
+      { id: 'cas_act_prato', eventId: 'ev_act_now', city: 'Prato', label: 'ACT NOW – Prato' },
+    ],
+  },
 ];
 
 export const ALL_CASCADES = EVENTS.flatMap(ev => ev.cascades);
