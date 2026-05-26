@@ -43,6 +43,14 @@ export const EVENTS: EventOption[] = [
       { id: 'cas_act_prato', eventId: 'ev_act_now', city: 'Prato', label: 'ACT NOW – Prato' },
     ],
   },
+  {
+    id: 'ev_act_early',
+    name: 'Act Early Protect More',
+    date: '2026',
+    cascades: [
+      { id: 'cas_act_early_bari', eventId: 'ev_act_early', city: 'Bari', label: 'Act Early Protect More – Bari' },
+    ],
+  },
 ];
 
 export const ALL_CASCADES = EVENTS.flatMap(ev => ev.cascades);
