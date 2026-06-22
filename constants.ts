@@ -51,6 +51,15 @@ export const EVENTS: EventOption[] = [
       { id: 'cas_act_early_bari', eventId: 'ev_act_early', city: 'Bari', label: 'Act Early Protect More – Bari' },
     ],
   },
+  {
+    id: 'ev_sglt2i',
+    name: 'Dalla gestione alla remissione: strategie precoci con SGLT2i',
+    date: '2026',
+    formType: 'sglt2i',
+    cascades: [
+      { id: 'cas_sglt2i_lamezia', eventId: 'ev_sglt2i', city: 'Lamezia Terme', label: 'Strategie precoci con SGLT2i – Lamezia Terme' },
+    ],
+  },
 ];
 
 export const ALL_CASCADES = EVENTS.flatMap(ev => ev.cascades);
@@ -236,6 +245,132 @@ export const SURVEY_QUESTIONS: Question[] = [
       'Canagliflozin',
       'Ertugliflozin',
       'Nessuno',
+      'Altro'
+    ],
+  },
+];
+
+// --- SCHEDA RESET Questions (SGLT2i Event) ---
+export const SURVEY_QUESTIONS_SGLT2I: Question[] = [
+  {
+    id: 'reset_durata_diabete',
+    text: 'DURATA DEL DIABETE',
+    type: 'multiple_choice',
+    options: [
+      '0 anni (neodiagnosi alla prima visita)',
+      '< 1 anno',
+      '1–2 anni',
+      '3–5 anni',
+      '> 5 anni'
+    ],
+  },
+  {
+    id: 'reset_bmi',
+    text: 'BMI',
+    type: 'multiple_choice',
+    options: [
+      'Sottopeso (<18.5)',
+      'Normopeso (18.5–24.9)',
+      'Sovrappeso (25.0–29.9)',
+      'Obesità (≥ 30)'
+    ],
+  },
+  {
+    id: 'reset_hba1c',
+    text: 'HbA1c PIÙ RECENTE',
+    type: 'multiple_choice',
+    options: [
+      '< 7%',
+      '7.0–7.9%',
+      '≥ 8%'
+    ],
+  },
+  {
+    id: 'reset_fattori_rischio',
+    text: 'FATTORI DI RISCHIO',
+    type: 'multi_select',
+    options: [
+      'Ipertensione',
+      'Dislipidemia',
+      'Familiarità cardiovascolare',
+      'Obesità viscerale',
+      'Fumo',
+      'Altro'
+    ],
+  },
+  {
+    id: 'reset_malattia_cv',
+    text: 'MALATTIA CARDIOVASCOLARE',
+    type: 'multiple_choice',
+    options: [
+      'Nessuna malattia cardiovascolare nota (prevenzione primaria)',
+      'ASCVD documentata (coronaropatia, arteriopatia periferica, vasculopatia cerebrale)',
+      'Scompenso cardiaco (HF)'
+    ],
+  },
+  {
+    id: 'reset_egfr',
+    text: 'FUNZIONE RENALE – eGFR',
+    type: 'multiple_choice',
+    options: [
+      '≥ 90',
+      '60–89',
+      '45–59',
+      '< 45'
+    ],
+  },
+  {
+    id: 'reset_albuminuria',
+    text: 'ALBUMINURIA (uACR mg/g)',
+    type: 'multiple_choice',
+    options: [
+      '< 30 (normoalbuminuria)',
+      '30–299 (microalbuminuria)',
+      '≥ 300 (macroalbuminuria)',
+      'Non disponibile'
+    ],
+  },
+  {
+    id: 'reset_driver_decisione',
+    text: 'DRIVER PRIMARIO DELLA DECISIONE TERAPEUTICA',
+    type: 'multi_select',
+    options: [
+      'Miglioramento metabolico',
+      'Protezione cardiorenale precoce / correzione dei fattori di rischio',
+      'Riduzione del rischio cardiovascolare (in pz con ASCVD)',
+      'Protezione renale (in pz con CKD)',
+      'Gestione dello scompenso cardiaco',
+      'Preferenza del paziente',
+      'Altro'
+    ],
+  },
+  {
+    id: 'reset_terapia_precedente',
+    text: 'TERAPIA PRECEDENTE DEL PAZIENTE – PRIMA DELLA DECISIONE TERAPEUTICA',
+    type: 'multi_select',
+    options: [
+      'Nessuna terapia (naïve)',
+      'Metformina',
+      'GLP-1 RA orale',
+      'GLP-1 RA iniettivo',
+      'DPP-4 inibitore',
+      'dual GIP/GLP1',
+      'Insulina',
+      'Altro'
+    ],
+  },
+  {
+    id: 'reset_terapia_attuale',
+    text: 'TERAPIA ATTUALE – DOPO LA DECISIONE TERAPEUTICA',
+    type: 'multi_select',
+    options: [
+      'SGLT2-inibitore',
+      'Metformina',
+      'GLP-1 RA orale',
+      'GLP-1 RA iniettivo',
+      'dual GIP/GLP1',
+      'DPP-4 inibitore',
+      'Insulina',
       'Altro'
     ],
   },

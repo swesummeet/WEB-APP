@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Patient, Question } from '../types';
-import { SURVEY_QUESTIONS, ALL_CASCADES } from '../constants';
+import { SURVEY_QUESTIONS, SURVEY_QUESTIONS_SGLT2I, ALL_CASCADES, EVENTS } from '../constants';
 import { savePatient } from '../services/storageService';
 import { Button } from '../components/Button';
 import { ArrowLeft, ClipboardList, Stethoscope, Check, Calculator } from 'lucide-react';
@@ -45,20 +45,23 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const cascade = ALL_CASCADES.find(c => c.id === user.cascadeId);
+  const event = EVENTS.find(e => e.id === cascade?.eventId);
+  const formType = event?.formType || 'standard';
+  const activeQuestions = formType === 'sglt2i' ? SURVEY_QUESTIONS_SGLT2I : SURVEY_QUESTIONS;
 
   const handleInputChange = (questionId: string, value: any) => {
     setAnswers(prev => {
       const updated = { ...prev, [questionId]: value };
 
-      // Auto-calculate BMI when peso or altezza change
-      if (questionId === 'peso' || questionId === 'altezza') {
+      // Auto-calculate BMI when peso or altezza change (standard form only)
+      if (formType === 'standard' && (questionId === 'peso' || questionId === 'altezza')) {
         const peso = parseFloat(questionId === 'peso' ? value : prev['peso']);
         const altezza = parseFloat(questionId === 'altezza' ? value : prev['altezza']);
         updated['bmi'] = calculateBMI(peso, altezza);
       }
 
-      // Auto-calculate eGFR when creatinina, eta or sesso change
-      if (questionId === 'creatinina' || questionId === 'eta' || questionId === 'sesso') {
+      // Auto-calculate eGFR when creatinina, eta or sesso change (standard form only)
+      if (formType === 'standard' && (questionId === 'creatinina' || questionId === 'eta' || questionId === 'sesso')) {
         const creatinina = parseFloat(questionId === 'creatinina' ? value : prev['creatinina']);
         const eta = parseFloat(questionId === 'eta' ? value : prev['eta']);
         const sesso = questionId === 'sesso' ? value : prev['sesso'];
@@ -105,7 +108,7 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
     e.preventDefault();
 
     // Validate required fields
-    const requiredQuestions = SURVEY_QUESTIONS.filter(q => q.required);
+    const requiredQuestions = activeQuestions.filter(q => q.required);
     const missing = requiredQuestions.filter(q => {
       const ans = answers[q.id];
       if (ans === undefined || ans === null || ans === '') return true;
@@ -286,10 +289,10 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
             </div>
             <div className="relative z-10">
               <div className="inline-block bg-[#F26627] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                PRIMA VISITA
+                {formType === 'sglt2i' ? 'SCHEDA RESET' : 'PRIMA VISITA'}
               </div>
               <h2 className="text-3xl font-black italic">
-                Paziente con DMT2 eleggibile a trattamento
+                {formType === 'sglt2i' ? 'Strategie precoci con SGLT2i' : 'Paziente con DMT2 eleggibile a trattamento'}
               </h2>
               <p className="mt-3 text-indigo-100 font-medium">
                 {cascade?.label} — Operatore: <span className="text-[#F9A26C]">{user.username}</span>
@@ -328,7 +331,7 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({ user, onBack }) => {
               <p className="text-xs text-slate-400 italic">I campi contrassegnati con <span className="text-red-500 font-bold">*</span> sono obbligatori.</p>
 
               <div className="space-y-16">
-                {SURVEY_QUESTIONS.map(q => renderQuestion(q))}
+                {activeQuestions.map(q => renderQuestion(q))}
               </div>
             </div>
 

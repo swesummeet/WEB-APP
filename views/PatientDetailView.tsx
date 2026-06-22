@@ -1,6 +1,6 @@
 import React from 'react';
 import { Patient, Question } from '../types';
-import { SURVEY_QUESTIONS, FOLLOWUP_QUESTIONS, ALL_CASCADES, EVENTS } from '../constants';
+import { SURVEY_QUESTIONS, SURVEY_QUESTIONS_SGLT2I, FOLLOWUP_QUESTIONS, ALL_CASCADES, EVENTS } from '../constants';
 import {
   ArrowLeft,
   ClipboardList,
@@ -83,7 +83,10 @@ const AnswerRow: React.FC<{ question: Question; answers: Record<string, any> }> 
 export const PatientDetailView: React.FC<PatientDetailViewProps> = ({ patient, onBack }) => {
   const cascade = ALL_CASCADES.find((c) => c.id === patient.cascadeId);
   const event = EVENTS.find((e) => e.id === cascade?.eventId);
-  const hasFollowup = !!patient.followupAnswers;
+  const formType = event?.formType || 'standard';
+  const activeQuestions = formType === 'sglt2i' ? SURVEY_QUESTIONS_SGLT2I : SURVEY_QUESTIONS;
+  const hasFollowup = formType !== 'sglt2i' && !!patient.followupAnswers;
+  const showFollowupMissing = formType !== 'sglt2i' && !patient.followupAnswers;
 
   return (
     <div className="min-h-screen bg-[#EFEEEE]">
@@ -156,7 +159,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({ patient, o
             </h2>
           </div>
           <div className="px-6 py-2">
-            {SURVEY_QUESTIONS.map((q) => (
+            {activeQuestions.map((q) => (
               <AnswerRow key={q.id} question={q} answers={patient.answers || {}} />
             ))}
           </div>
@@ -180,7 +183,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({ patient, o
         )}
 
         {/* Missing followup notice */}
-        {!hasFollowup && (
+        {showFollowupMissing && (
           <div className="flex items-center gap-3 bg-white border border-dashed border-[#9BD7D1] rounded-2xl p-5 text-[#325D79]/50">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <p className="text-sm font-semibold">Il follow-up non è ancora stato compilato per questo paziente.</p>

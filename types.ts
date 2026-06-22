@@ -15,6 +15,7 @@ export interface EventOption {
   name: string;
   date: string;
   cascades: Cascade[];
+  formType?: 'standard' | 'sglt2i';
 }
 
 export interface User {

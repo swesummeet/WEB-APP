@@ -31,6 +31,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
 
   const cascade = ALL_CASCADES.find(c => c.id === user.cascadeId);
   const event = EVENTS.find(e => e.id === cascade?.eventId);
+  const formType = event?.formType || 'standard';
+  const hasFollowup = formType !== 'sglt2i';
 
   const fetchPatients = async () => {
     setIsLoading(true);
@@ -94,10 +96,12 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                   <span className="block text-[10px] uppercase font-bold text-[#F9A26C]">Schede Inserite</span>
                   <span className="text-2xl font-black">{patients.length}</span>
                 </div>
+                {hasFollowup && (
                 <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
                   <span className="block text-[10px] uppercase font-bold text-[#9BD7D1]">Follow-up OK</span>
                   <span className="text-2xl font-black">{completedFollowups}</span>
                 </div>
+                )}
               </div>
             </div>
             <Button
@@ -169,6 +173,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                         <Eye className="w-4 h-4" />
                         Visualizza
                       </button>
+                      {hasFollowup && (
+                        <>
                       {patient.followupAnswers ? (
                         <div className="flex items-center gap-2 bg-[#9BD7D1]/20 text-[#325D79] px-4 py-2.5 rounded-xl font-bold text-sm grow md:grow-0 justify-center">
                           <CheckCircle2 className="w-4 h-4 text-[#F26627]" />
@@ -182,6 +188,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, on
                           Follow-up
                           <ChevronRight className="w-4 h-4 translate-x-0 group-hover/btn:translate-x-1 transition-transform" />
                         </button>
+                      )}
+                        </>
                       )}
                     </div>
                   </div>
