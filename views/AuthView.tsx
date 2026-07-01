@@ -171,8 +171,15 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                     className="px-3 py-2.5 bg-white border border-[#9BD7D1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9A26C] text-[#325D79] font-medium transition-all"
                     value={selectedEventId}
                     onChange={(e) => {
-                      setSelectedEventId(e.target.value);
-                      setSelectedCascadeId('');
+                      const newEventId = e.target.value;
+                      setSelectedEventId(newEventId);
+                      
+                      const newEvent = EVENTS.find(ev => ev.id === newEventId);
+                      if (newEvent && newEvent.cascades.length === 1) {
+                        setSelectedCascadeId(newEvent.cascades[0].id);
+                      } else {
+                        setSelectedCascadeId('');
+                      }
                     }}
                     required
                   >
